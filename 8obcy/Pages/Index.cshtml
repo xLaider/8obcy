@@ -1,31 +1,49 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "8obcy";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div id="titlearea" class="text-center">
+                    <h1 class="title">8OBCY</h1>
+                    <h5>Chcesz poznać nowych interesujacych ludzi? To miejsce idealne do tego stworzone. <br>Rozpocznij anonimową rozmowę z losową osobą, może poznasz kogoś ciekawego</h5>
+                </div>
 
-<div>
-    <div id="userinfo" class="row">
-        <label for="username">Please input your UserName</label>
-        <input type="text" class="form-control" id="username" name="username" autocomplete="off"/>
-        <button type="button" class="btn btn-block" onclick="SetUsername();">Join</button>
-    </div>
-    <div id="messagearea" class="row" style="display: none;">
-        <div>Joined as : <b><span id="username1">Not Set</span></b></div>
-        <hr/>
-        <div class="row">
-            <div class="col-6">
-                <ul id="messageList"></ul>
+                <div id="userinfo" class="row text-center">
+                    <div class="col-6 offset-3">
+                        <label for="username"><b>Please input your UserName</b></label>
+                        <input type="text" class="form-control" id="username" name="username" autocomplete="off"/>
+                        <button type="button" class="button-neon" onclick="SetUsername();">Join</button>
+                    </div>
+                </div>
+                <div id="messagearea" class="row" style="display: none;">
+                    <div class="col-md-8 offset-md-2 col-sm-10 offset-sm-1" >
+                        <div class="messagecard">
+                            <div class="row">
+                                <div class="col-12">
+                                    <ul id="messageList"></ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>Joined as : <b><span id="username1">Not Set</span></b></div>
+                            </div>
+                        <div class="row">
+                            <div class="col-lg-9 col-md-12">
+                                <input type="text" class="message" id="message" autocomplete="off"/>
+                            </div>
+                            <div class="col-lg-3 col-md-12">
+                                <input type="button" class="sendmessage" id="sendButton" value="SEND"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <hr/>
-        <input type="text" id="message" autocomplete="off"/>
-        <input type="button" id="sendButton" value="Send Message"/>
     </div>
 </div>
 
@@ -41,10 +59,24 @@
     connection.on("ReceiveMessage", function(user, message){
         console.log(message);
         var msg = message.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-        var encodedMsg = user + " says: "+msg;
-        var li = document.createElement("li");
-        li.textContent = encodedMsg;
-        document.getElementById("messageList").appendChild(li);
+        //var encodedMsg = user + " says: "+msg;
+        //var li = document.createElement("li");
+       // li.textContent = encodedMsg;
+        //document.getElementById("messageList").appendChild(li);
+       /* if(username==user){
+            var encodedMsg = "<li style=' display: flex; text-align: right;flex-direction: column;align-items: flex-end;'><div style='width: fit-content;border-radius: 20px; padding: 2px 10px; margin: 10px 0 2px;border: 2px solid #0ff;overflow-wrap: break-word;max-width: 350px;' >"+msg+"</div><div style='color: #0ff;font-size: 12px;'>"+user+"</div></li>";
+        }else{
+            var encodedMsg = "<li style=' display: flex; text-align: left;flex-direction: column;align-items: flex-start;'><div style='width: fit-content;border-radius: 20px; padding: 2px 10px; margin: 10px 0 2px;border: 2px solid #0ff;overflow-wrap: break-word;max-width: 350px;' >"+msg+"</div><div style='color: #0ff;font-size: 12px;'>"+user+"</div></li>";
+        }*/
+
+        if(username==user){
+            var encodedMsg = "<li class='right' ><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
+        }else{
+            var encodedMsg = "<li class='left'><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
+        }
+
+        
+        document.getElementById("messageList").innerHTML += encodedMsg;
     });
 
     connection.start().then(function (){
@@ -72,6 +104,7 @@
         username = usernameinput;
 
         document.getElementById("userinfo").style.display = "none";
+        document.getElementById("titlearea").style.display = "none";
         document.getElementById("messagearea").style.display = "block";
         document.getElementById("username1").innerText = usernameinput;
     }
