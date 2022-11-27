@@ -52,30 +52,19 @@
     "use strict";
     var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
     var username = "";
+    var connectionId = "";
 
     //Disable send button until connection is established
 
     document.getElementById("sendButton").disabled = true;
-    connection.on("ReceiveMessage", function(user, message){
-        console.log(message);
+    
+    connection.on("ReceiveMessage", function(user, message, conId){
         var msg = message.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-        //var encodedMsg = user + " says: "+msg;
-        //var li = document.createElement("li");
-       // li.textContent = encodedMsg;
-        //document.getElementById("messageList").appendChild(li);
-       /* if(username==user){
-            var encodedMsg = "<li style=' display: flex; text-align: right;flex-direction: column;align-items: flex-end;'><div style='width: fit-content;border-radius: 20px; padding: 2px 10px; margin: 10px 0 2px;border: 2px solid #0ff;overflow-wrap: break-word;max-width: 350px;' >"+msg+"</div><div style='color: #0ff;font-size: 12px;'>"+user+"</div></li>";
-        }else{
-            var encodedMsg = "<li style=' display: flex; text-align: left;flex-direction: column;align-items: flex-start;'><div style='width: fit-content;border-radius: 20px; padding: 2px 10px; margin: 10px 0 2px;border: 2px solid #0ff;overflow-wrap: break-word;max-width: 350px;' >"+msg+"</div><div style='color: #0ff;font-size: 12px;'>"+user+"</div></li>";
-        }*/
-
-        if(username==user){
+        if(conId==connectionId){
             var encodedMsg = "<li class='right' ><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
         }else{
             var encodedMsg = "<li class='left'><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
         }
-
-        
         document.getElementById("messageList").innerHTML += encodedMsg;
     });
 
@@ -107,6 +96,12 @@
         document.getElementById("titlearea").style.display = "none";
         document.getElementById("messagearea").style.display = "block";
         document.getElementById("username1").innerText = usernameinput;
+        connection.invoke("GetConnectionId").catch(function(err){
+            return console.error(err.toString());
+        });;
     }
+    connection.on("GetConnectionId", function(conId){
+        connectionId = conId;
+    });
 
 </script>

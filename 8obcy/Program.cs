@@ -1,10 +1,13 @@
+using _8obcy;
 using _8obcy.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<_8obcy.IGroupManager, GroupManager>();
 
 var app = builder.Build();
 
