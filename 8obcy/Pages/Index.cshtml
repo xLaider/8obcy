@@ -16,12 +16,12 @@
                 <div id="userinfo" class="row text-center">
                     <div class="col-6 offset-3">
                         <label for="username"><b>Please input your UserName</b></label>
-                        <input type="text" class="form-control" id="username" name="username" autocomplete="off"/>
-                        <button type="button" class="button-neon" onclick="SetUsername();">Join</button>
+                        <input type="text" class="form-control" id="username" name="username" autocomplete="off" />
+                        <button type="button" class="button-neon" onclick="SetUsername()">Join</button>
                     </div>
                 </div>
                 <div id="messagearea" class="row" style="display: none;">
-                    <div class="col-md-8 offset-md-2 col-sm-10 offset-sm-1" >
+                    <div class="col-md-8 offset-md-2 col-sm-10 offset-sm-1">
                         <div class="messagecard">
                             <div class="row">
                                 <div class="col-12">
@@ -31,13 +31,18 @@
                         </div>
                         <div class="row">
                             <div>Joined as : <b><span id="username1">Not Set</span></b></div>
-                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-lg-9 col-md-12">
-                                <input type="text" class="message" id="message" autocomplete="off"/>
+                                <input type="text" class="message" id="message" autocomplete="off" />
                             </div>
                             <div class="col-lg-3 col-md-12">
-                                <input type="button" class="sendmessage" id="sendButton" value="SEND"/>
+                                <input type="button" class="sendmessage" id="sendButton" value="SEND" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4 offset-4">
+                                <button type="button" class="button-new-chat" onclick="NewChat()">New Chat</button>
                             </div>
                         </div>
                     </div>
@@ -57,13 +62,19 @@
     //Disable send button until connection is established
 
     document.getElementById("sendButton").disabled = true;
-    
-    connection.on("ReceiveMessage", function(user, message, conId){
-        var msg = message.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-        if(conId==connectionId){
-            var encodedMsg = "<li class='right' ><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
+
+    connection.on("ReceiveMessage", function(user, dataTemp, conId){
+        const data = JSON.parse(dataTemp);
+        var msg = data["data"].replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        if(data["type"]=="msg"){
+            
+            if(conId==connectionId){
+                var encodedMsg = "<li class='right' ><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
+            }else{
+                var encodedMsg = "<li class='left'><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
+            }   
         }else{
-            var encodedMsg = "<li class='left'><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
+            var encodedMsg = "<hr><li><div class='disconnect'>"+msg+"</div></li>";
         }
         document.getElementById("messageList").innerHTML += encodedMsg;
     });
@@ -76,7 +87,8 @@
 
     document.getElementById("sendButton").addEventListener("click", function(event){
         var message = document.getElementById("message").value;
-        connection.invoke("SendMessage", username, message).then(function(){
+        var data = '{"type":"msg", "data": "'+message+'" }';
+        connection.invoke("SendMessage", username, data).then(function(){
             document.getElementById("message").value=""
         }).catch(function(err){
             return console.error(err.toString());
@@ -84,12 +96,25 @@
         event.preventDefault();
     });
 
+    function NewChat(){
+         var message = username+" has disconnected start a new chat";
+         var data = '{"type":"disconnect", "data": "'+message+'" }';
+          connection.invoke("SendMessage", username, data).then(function(){
+            document.getElementById("message").value=""
+        }).catch(function(err){
+            return console.error(err.toString());
+        });
+         connection.invoke("GetConnectionId").catch(function(err){
+            return console.error(err.toString());
+        });
+    }
+
     function SetUsername(){
         var usernameinput = document.getElementById("username").value;
         if (usernameinput == ""){
             alert("please enter you user name");
             return;
-        } 
+        }
         username = usernameinput;
 
         document.getElementById("userinfo").style.display = "none";
@@ -98,10 +123,11 @@
         document.getElementById("username1").innerText = usernameinput;
         connection.invoke("GetConnectionId").catch(function(err){
             return console.error(err.toString());
-        });;
+        });
     }
     connection.on("GetConnectionId", function(conId){
         connectionId = conId;
     });
+
 
 </script>
