@@ -13,38 +13,60 @@ namespace _8obcy.Hubs
         }
         public async Task SendMessage(string username, string message)
         {
-            await Clients.Group(_groupManager.GetCurrentGroup(Context.ConnectionId))
-                .SendAsync("ReceiveMessage",username, message, this.Context.ConnectionId);
-        }
-        public async Task ChangeGroup(string message)
-        {
-            var currentGroupId = _groupManager.GetCurrentGroup(Context.ConnectionId);
-            if (currentGroupId != String.Empty)
+            var currentGroup = _groupManager.GetCurrentGroup(Context.ConnectionId);
+            if (currentGroup != null)
             {
-                await SendEndConversationMessage(message);
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, _groupManager.GetCurrentGroup(Context.ConnectionId));
-                _groupManager.RemoveGroup(Context.ConnectionId);
+                await Clients.Group(currentGroup.Id.ToString())
+                .SendAsync("ReceiveMessage", username, message, this.Context.ConnectionId);
             }
-            _groupManager.ChangeGroup(Context.ConnectionId);
-            await Groups.AddToGroupAsync(Context.ConnectionId, _groupManager.GetCurrentGroup(Context.ConnectionId));
+            
+        }
+        public async Task ChangeGroup(string message, string username)
+        {
+            var currentGroup = _groupManager.GetCurrentGroup(Context.ConnectionId);
+            if (currentGroup != null)
+            {
+                await SendEndConversationMessage(message, username);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, currentGroup.Id);
+                _groupManager.RemoveGroupByConnectionId(Context.ConnectionId);
+            }
+            await HandleLookingForGroup();
+            await Groups.AddToGroupAsync(Context.ConnectionId, _groupManager.GetCurrentGroup(Context.ConnectionId).Id);
             
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            await SendEndConversationMessage("Twój rozmówca się rozłączył");
-            _groupManager.RemoveGroup(Context.ConnectionId);
+            await SendEndConversationMessage("Twój rozmówca się rozłączył", "");
+            _groupManager.RemoveGroupByConnectionId(Context.ConnectionId);
         }
         public override async Task OnConnectedAsync()
         {
-            var groupName = _groupManager.ChangeGroup(Context.ConnectionId);
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            await HandleLookingForGroup();
             await Clients.Caller.SendAsync("GetConnectionId", Context.ConnectionId);
         }
-
-        private async Task SendEndConversationMessage(string message)
+        private async Task HandleLookingForGroup()
         {
-            await Clients.Group(_groupManager.GetCurrentGroup(Context.ConnectionId))
-                .SendAsync("EndConversationMessage", message);
+            await SendSearchingForConversationMessage();
+            var group = _groupManager.ChangeGroup(Context.ConnectionId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, group.Id);
+            if (!group.Open)
+            {
+                await SendFoundConversationMessage();
+            }
+        }
+        private async Task SendEndConversationMessage(string message, string username)
+        {
+            await Clients.Group(_groupManager.GetCurrentGroup(Context.ConnectionId).Id)
+                .SendAsync("EndConversationMessage", message, username);
+        }
+        private async Task SendSearchingForConversationMessage()
+        {
+            await Clients.Caller.SendAsync("SearchingForConversationMessage", "Szukanie nieznajomego...");
+        }
+        private async Task SendFoundConversationMessage()
+        {
+            await Clients.Group(_groupManager.GetCurrentGroup(Context.ConnectionId).Id)
+                .SendAsync("FoundConversationMessage", "Znaleziono nieznajomego!");
         }
     }
 }

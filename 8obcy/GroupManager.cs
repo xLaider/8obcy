@@ -8,9 +8,9 @@ namespace _8obcy
     {
         private IList<Group> Groups = new List<Group>();
         private int IdIncrementer = 0;
-        public string ChangeGroup(string connectionId)
+        public Group ChangeGroup(string connectionId)
         {
-            RemoveGroup(connectionId);
+            RemoveGroupByConnectionId(connectionId);
             var destinationGroup = Groups.FirstOrDefault(x => x.Open);
             if (destinationGroup == null)
             {
@@ -22,14 +22,13 @@ namespace _8obcy
             {
                 destinationGroup.Open = false;
             }
-            return destinationGroup.Id.ToString();
+            return destinationGroup;
         }
-        public string GetCurrentGroup(string connectionId)
+        public Group GetCurrentGroup(string connectionId)
         {
-            var currentGroup = Groups.FirstOrDefault(x => x.ConnectionIds.Any(y => y == connectionId));
-            return currentGroup == null ? String.Empty : currentGroup.Id.ToString();
+            return Groups.FirstOrDefault(x => x.ConnectionIds.Any(y => y == connectionId));
         }
-        public void RemoveGroup(string connectionId)
+        public void RemoveGroupByConnectionId(string connectionId)
         {
             var originGroup = Groups.FirstOrDefault(x => x.ConnectionIds.Any(y => y == connectionId));
             if (originGroup != null)
@@ -42,7 +41,7 @@ namespace _8obcy
             IdIncrementer++;
             return new Group
             {
-                Id = IdIncrementer,
+                Id = IdIncrementer.ToString(),
                 Open = true,
             };
             

@@ -37,12 +37,12 @@
                                 <input type="text" class="message" id="message" autocomplete="off" />
                             </div>
                             <div class="col-lg-3 col-md-12">
-                                <input type="button" class="sendmessage" id="sendButton" value="SEND" />
+                                <input type="button" class="sendmessage" id="sendButton" value="WYŚLIJ" />
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-4 offset-4">
-                                <button type="button" class="button-new-chat" onclick="NewChat()">New Chat</button>
+                                <button type="button" id="nextStranger" class="button-new-chat" onclick="NewChat()">Następny nieznajomy</button>
                             </div>
                         </div>
                     </div>
@@ -60,13 +60,6 @@
     var connectionId = "";
 
     //Disable send button until connection is established
-    connection.start().then(function () {
-        document.getElementById("sendButton").disabled = false;
-    }).catch(function (err) {
-        return console.error(err.toString());
-    });
-
-
     document.getElementById("sendButton").disabled = true;
 
     connection.on("ReceiveMessage", function(user, message, conId){
@@ -78,9 +71,24 @@
         }   
         document.getElementById("messageList").innerHTML += encodedMsg;
     });
-
-    connection.on("EndConversationMessage", function (message) {
+    //Message about ending conversation
+    connection.on("EndConversationMessage", function (message, usrnm) {
+        if (usrnm != username){
+            document.getElementById("messageList").innerHTML += "<hr><li><div class='disconnect'>" + message + "</div></li>";
+        }
+        document.getElementById("sendButton").disabled = true;
+    });
+    //Message about finding conversation
+    connection.on("FoundConversationMessage", function (message) {
         document.getElementById("messageList").innerHTML += "<hr><li><div class='disconnect'>" + message + "</div></li>";
+        document.getElementById("sendButton").disabled = false;
+        document.getElementById("nextStranger").disabled = false;
+    });
+    //Message about searching for conversation
+    connection.on("SearchingForConversationMessage", function (message) {
+        document.getElementById("messageList").innerHTML += "<hr><li><div class='disconnect'>" + message + "</div></li>";
+        document.getElementById("sendButton").disabled = true;
+        document.getElementById("nextStranger").disabled = true;
     });
    
 
@@ -95,8 +103,8 @@
     });
 
     function NewChat(){
-         var message = username+" zmienił rozmówcę. Zacznij nową rozmowę!";
-          connection.invoke("ChangeGroup", message).then(function(){
+         var message = username+" zmienił rozmówcę. Poszukaj następnego nieznajomego!";
+          connection.invoke("ChangeGroup", message, username).then(function(){
             document.getElementById("message").value=""
         }).catch(function(err){
             return console.error(err.toString());
@@ -107,25 +115,26 @@
     }
 
     function SetUsername(){
+        connection.start().then(function () {
+            document.getElementById("sendButton").disabled = false;
+        }).catch(function (err) {
+            return console.error(err.toString());
+        });
         var usernameinput = document.getElementById("username").value;
         if (usernameinput == ""){
             alert("please enter you user name");
             return;
         }
         username = usernameinput;
-
         document.getElementById("userinfo").style.display = "none";
         document.getElementById("titlearea").style.display = "none";
         document.getElementById("messagearea").style.display = "block";
         document.getElementById("username1").innerText = usernameinput;
-        //connection.invoke("GetConnectionId").catch(function(err){
-        //    return console.error(err.toString());
-        //});
     }
+
     connection.on("GetConnectionId", function(conId){
         connectionId = conId;
     });
-
 
     window.onbeforeunload = function (e) {
         connection.stop();

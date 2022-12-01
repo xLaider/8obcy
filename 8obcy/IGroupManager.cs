@@ -2,9 +2,9 @@
 {
     public interface IGroupManager
     {
-        public string ChangeGroup(string connectionId);
-        public string GetCurrentGroup(string connectionId);
-        public void RemoveGroup(string connectionId);
+        public Group ChangeGroup(string connectionId);
+        public Group GetCurrentGroup(string connectionId);
+        public void RemoveGroupByConnectionId(string connectionId);
         
     }
 }
