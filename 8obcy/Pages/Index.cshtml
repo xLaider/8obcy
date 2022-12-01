@@ -15,9 +15,9 @@
 
                 <div id="userinfo" class="row text-center">
                     <div class="col-6 offset-3">
-                        <label for="username"><b>Please input your UserName</b></label>
+                        <label for="username"><b>Wprowadź swoją nazwę</b></label>
                         <input type="text" class="form-control" id="username" name="username" autocomplete="off" />
-                        <button type="button" class="button-neon" onclick="SetUsername()">Join</button>
+                        <button type="button" class="button-neon" onclick="SetUsername()">Szukaj rozmówcy</button>
                     </div>
                 </div>
                 <div id="messagearea" class="row" style="display: none;">
@@ -30,7 +30,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div>Joined as : <b><span id="username1">Not Set</span></b></div>
+                            <div>Dołączono jako : <b><span id="username1">Not Set</span></b></div>
                         </div>
                         <div class="row">
                             <div class="col-lg-9 col-md-12">
@@ -60,35 +60,33 @@
     var connectionId = "";
 
     //Disable send button until connection is established
-
-    document.getElementById("sendButton").disabled = true;
-
-    connection.on("ReceiveMessage", function(user, dataTemp, conId){
-        const data = JSON.parse(dataTemp);
-        var msg = data["data"].replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-        if(data["type"]=="msg"){
-            
-            if(conId==connectionId){
-                var encodedMsg = "<li class='right' ><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
-            }else{
-                var encodedMsg = "<li class='left'><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
-            }   
-        }else{
-            var encodedMsg = "<hr><li><div class='disconnect'>"+msg+"</div></li>";
-        }
-        document.getElementById("messageList").innerHTML += encodedMsg;
-    });
-
-    connection.start().then(function (){
+    connection.start().then(function () {
         document.getElementById("sendButton").disabled = false;
-    }).catch(function (err){
+    }).catch(function (err) {
         return console.error(err.toString());
     });
 
+
+    document.getElementById("sendButton").disabled = true;
+
+    connection.on("ReceiveMessage", function(user, message, conId){
+        var msg = message.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");  
+        if(conId==connectionId){
+             var encodedMsg = "<li class='right' ><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
+        }else{
+             var encodedMsg = "<li class='left'><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
+        }   
+        document.getElementById("messageList").innerHTML += encodedMsg;
+    });
+
+    connection.on("EndConversationMessage", function (message) {
+        document.getElementById("messageList").innerHTML += "<hr><li><div class='disconnect'>" + message + "</div></li>";
+    });
+   
+
     document.getElementById("sendButton").addEventListener("click", function(event){
         var message = document.getElementById("message").value;
-        var data = '{"type":"msg", "data": "'+message+'" }';
-        connection.invoke("SendMessage", username, data).then(function(){
+        connection.invoke("SendMessage", username,message).then(function(){
             document.getElementById("message").value=""
         }).catch(function(err){
             return console.error(err.toString());
@@ -97,9 +95,8 @@
     });
 
     function NewChat(){
-         var message = username+" has disconnected start a new chat";
-         var data = '{"type":"disconnect", "data": "'+message+'" }';
-          connection.invoke("SendMessage", username, data).then(function(){
+         var message = username+" zmienił rozmówcę. Zacznij nową rozmowę!";
+          connection.invoke("ChangeGroup", message).then(function(){
             document.getElementById("message").value=""
         }).catch(function(err){
             return console.error(err.toString());
@@ -121,13 +118,18 @@
         document.getElementById("titlearea").style.display = "none";
         document.getElementById("messagearea").style.display = "block";
         document.getElementById("username1").innerText = usernameinput;
-        connection.invoke("GetConnectionId").catch(function(err){
-            return console.error(err.toString());
-        });
+        //connection.invoke("GetConnectionId").catch(function(err){
+        //    return console.error(err.toString());
+        //});
     }
     connection.on("GetConnectionId", function(conId){
         connectionId = conId;
     });
+
+
+    window.onbeforeunload = function (e) {
+        connection.stop();
+    }
 
 
 </script>

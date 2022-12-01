@@ -7,55 +7,46 @@ namespace _8obcy
     public class GroupManager : IGroupManager
     {
         private IList<Group> Groups = new List<Group>();
-        private static Random rnd = new Random();
+        private int IdIncrementer = 0;
         public string ChangeGroup(string connectionId)
         {
-
-            var originGroup = Groups.FirstOrDefault(x => x.ConnectionIds.Any(y => y == connectionId));
-            if (originGroup != null)
+            RemoveGroup(connectionId);
+            var destinationGroup = Groups.FirstOrDefault(x => x.Open);
+            if (destinationGroup == null)
             {
-                originGroup.ConnectionIds.Remove(connectionId);
+                destinationGroup = GenerateNewGroup();
+                Groups.Add(destinationGroup);
             }
-            var possibleGroups = Groups.Where(x => x.Open).ToList();
-            if (Groups.Count == 0 || possibleGroups.Count == 0)
-            {
-                GenerateNewGroup();
-                possibleGroups.Add(Groups.Last());
-            }
-            var destinationGroup = possibleGroups[rnd.Next(possibleGroups.Count)];
             destinationGroup.ConnectionIds.Add(connectionId);
             if (destinationGroup.ConnectionIds.Count == 2)
             {
                 destinationGroup.Open = false;
             }
-            if (originGroup != null)
-            {
-                if (originGroup.ConnectionIds.Count == 0)
-                {
-                    Groups.Remove(originGroup);
-                }
-                else
-                {
-                    originGroup.Open = true;
-                }
-            }
             return destinationGroup.Id.ToString();
-
-
         }
-
         public string GetCurrentGroup(string connectionId)
         {
-            return Groups.FirstOrDefault(x => x.ConnectionIds.Any(y => y == connectionId)).Id.ToString();
+            var currentGroup = Groups.FirstOrDefault(x => x.ConnectionIds.Any(y => y == connectionId));
+            return currentGroup == null ? String.Empty : currentGroup.Id.ToString();
         }
-
-        private void GenerateNewGroup()
+        public void RemoveGroup(string connectionId)
         {
-            Groups.Add(new Group
+            var originGroup = Groups.FirstOrDefault(x => x.ConnectionIds.Any(y => y == connectionId));
+            if (originGroup != null)
             {
-                Id = Groups.Count == 0 ? 1 : Groups.Count + 1,
-                Open = true,
-            });
+                Groups.Remove(originGroup);
+            }
         }
+        private Group GenerateNewGroup()
+        {
+            IdIncrementer++;
+            return new Group
+            {
+                Id = IdIncrementer,
+                Open = true,
+            };
+            
+        }
+     
     }
 }

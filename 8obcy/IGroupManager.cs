@@ -4,5 +4,7 @@
     {
         public string ChangeGroup(string connectionId);
         public string GetCurrentGroup(string connectionId);
+        public void RemoveGroup(string connectionId);
+        
     }
 }
