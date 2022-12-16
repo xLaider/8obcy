@@ -52,6 +52,7 @@
     </div>
 </div>
 
+<script src="~/crypto-js/crypto-js.js"></script>
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 <script>
     "use strict";
@@ -63,7 +64,10 @@
     document.getElementById("sendButton").disabled = true;
 
     connection.on("ReceiveMessage", function(user, message, conId){
-        var msg = message.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");  
+        var bytes = CryptoJS.AES.decrypt(message, conId);
+        var originalText = bytes.toString(CryptoJS.enc.Utf8);
+        var msg = originalText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
         if(conId==connectionId){
              var encodedMsg = "<li class='right' ><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
         }else{
@@ -94,6 +98,7 @@
 
     document.getElementById("sendButton").addEventListener("click", function(event){
         var message = document.getElementById("message").value;
+        message = CryptoJS.AES.encrypt(message, connectionId).toString();
         connection.invoke("SendMessage", username,message).then(function(){
             document.getElementById("message").value=""
         }).catch(function(err){
@@ -139,6 +144,5 @@
     window.onbeforeunload = function (e) {
         connection.stop();
     }
-
 
 </script>

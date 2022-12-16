@@ -39,11 +39,16 @@ namespace _8obcy
         private Group GenerateNewGroup()
         {
             IdIncrementer++;
+            if (IdIncrementer == Int32.MaxValue)
+            {
+                IdIncrementer = 1;
+            }
             return new Group
             {
                 Id = IdIncrementer.ToString(),
                 Open = true,
             };
+            
             
         }
      

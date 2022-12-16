@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNet.SignalR.Messaging;
 using Microsoft.AspNetCore.SignalR;
 using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace _8obcy.Hubs
 {
@@ -19,7 +21,7 @@ namespace _8obcy.Hubs
                 await Clients.Group(currentGroup.Id.ToString())
                 .SendAsync("ReceiveMessage", username, message, this.Context.ConnectionId);
             }
-            
+
         }
         public async Task ChangeGroup(string message, string username)
         {
@@ -32,7 +34,7 @@ namespace _8obcy.Hubs
             }
             await HandleLookingForGroup();
             await Groups.AddToGroupAsync(Context.ConnectionId, _groupManager.GetCurrentGroup(Context.ConnectionId).Id);
-            
+
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {

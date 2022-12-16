@@ -9,6 +9,10 @@
         "dist/browser/signalr.js",
         "dist/browser/signalr.min.js"
       ]
+    },
+    {
+      "library": "crypto-js@4.1.1",
+      "destination": "wwwroot/crypto-js/"
     }
   ]
 }
