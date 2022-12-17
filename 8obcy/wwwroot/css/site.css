@@ -24,8 +24,8 @@ a:hover {
     color: #0ff;
 }
 
+
 .title {
-    
     color: #0ff;
     letter-spacing: 20px;
     text-shadow: 0 0 7px #0ff, 0 0 10px #0ff, 0 0 50px #0ff;
@@ -254,6 +254,22 @@ label {
     max-height: 10px;
 }
 
+@media (max-width: 1200px) {
+    .card {
+        margin: 15rem 0;
+    }
+}
+
+@media (max-width: 991px) {
+    .msg {
+        max-width: 300px;
+    }
+
+    .card {
+        margin: 11rem 0;
+    }
+}
+
 @media (max-width: 767px) {
     .button-neon {
         padding: 5px 30px;
@@ -265,13 +281,14 @@ label {
         font-size: 20px;
     }
 
+    .card {
+        margin: 9rem 0;
+    }
+
 }
 
-@media (max-width: 991px) {
-    .msg {
-        max-width: 300px;
-    }
-}
+
+
 
 @media (max-width: 510px) {
     .msg {
