@@ -78,19 +78,19 @@
     //Message about ending conversation
     connection.on("EndConversationMessage", function (message, usrnm) {
         if (usrnm != username){
-            document.getElementById("messageList").innerHTML += "<hr><li><div class='disconnect'>" + message + "</div></li>";
+            document.getElementById("messageList").innerHTML += "<li><div class='disconnect'>" + message + "</div></li>";
         }
         document.getElementById("sendButton").disabled = true;
     });
     //Message about finding conversation
     connection.on("FoundConversationMessage", function (message) {
-        document.getElementById("messageList").innerHTML += "<hr><li><div class='disconnect'>" + message + "</div></li>";
+        document.getElementById("messageList").innerHTML += "<li><div class='find'>" + message + "</div></li>";
         document.getElementById("sendButton").disabled = false;
         document.getElementById("nextStranger").disabled = false;
     });
     //Message about searching for conversation
     connection.on("SearchingForConversationMessage", function (message) {
-        document.getElementById("messageList").innerHTML += "<hr><li><div class='disconnect'>" + message + "</div></li>";
+        document.getElementById("messageList").innerHTML += "<hr><li><div class='searching'>" + message + "</div></li><hr>";
         document.getElementById("sendButton").disabled = true;
         document.getElementById("nextStranger").disabled = true;
     });

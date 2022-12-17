@@ -42,6 +42,8 @@ body {
 
 li {
     list-style: none;
+    display: flex;
+    justify-content: center;
 }
 
 .card {
@@ -193,8 +195,35 @@ label {
 }
 
 .disconnect {
-    color: dimgray;
+    color: darkred;
     text-align: center;
+    margin: 20px 0;
+}
+
+.find {
+    color: #00ff2c;
+    width: 300px;
+    border: 2px solid #00ff2c; 
+    text-shadow: 0 0 7px #0fa, 0 0 10px #0fa, 0 0 50px #00ff2c;
+    text-align: center;
+    border-radius:50px;
+    margin: 20px 0;
+}
+
+.searching {
+    color: white;
+    animation: glow 0.8s ease-in-out infinite alternate;
+    text-align: center;
+}
+
+@-webkit-keyframes glow {
+    from {
+        text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #aeaeaed9, 0 0 30px #aeaeaed9, 0 0 40px #aeaeaed9;
+    }
+
+    to {
+        text-shadow: 0 0 20px #fff, 0 0 30px #aeaeaeb7, 0 0 40px #aeaeaeb7, 0 0 50px #aeaeaeb7, 0 0 60px #aeaeaeb7, 0 0 70px #aeaeaeb7;
+    }
 }
 
 .button-new-chat {
