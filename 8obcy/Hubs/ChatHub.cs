@@ -63,7 +63,7 @@ namespace _8obcy.Hubs
         }
         private async Task SendSearchingForConversationMessage()
         {
-            await Clients.Caller.SendAsync("SearchingForConversationMessage", "Szukanie nieznajomego...");
+            await Clients.Caller.SendAsync("SearchingForConversationMessage", "Szukanie nieznajomego..."); 
         }
         private async Task SendFoundConversationMessage()
         {

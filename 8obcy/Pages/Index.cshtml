@@ -22,7 +22,7 @@
                 </div>
                 <div id="messagearea" class="row" style="display: none;">
                     <div class="col-md-8 offset-md-2 col-sm-10 offset-sm-1">
-                        <div class="messagecard">
+                        <div class="messagecard" id="messageCard">
                             <div class="row">
                                 <div class="col-12">
                                     <ul id="messageList"></ul>
@@ -37,7 +37,7 @@
                                 <input type="text" class="message" id="message" autocomplete="off" />
                             </div>
                             <div class="col-lg-3 col-md-12">
-                                <input type="button" class="sendmessage" id="sendButton" value="WYŚLIJ" />
+                                <button type="button" class="sendmessage" id="sendButton">WYŚLIJ</button> 
                             </div>
                         </div>
                         <div class="row">
@@ -73,7 +73,10 @@
         }else{
              var encodedMsg = "<li class='left'><div class='msg' >"+msg+"</div><div class='user'>"+user+"</div></li>";
         }   
-        document.getElementById("messageList").innerHTML += encodedMsg;
+        var messageList = document.getElementById("messageList");
+        messageList.innerHTML += encodedMsg;
+        var messageCard = document.getElementById("messageCard");
+        messageCard.scroll({top: messageCard.scrollHeight, behaviour: "smooth"});
     });
     //Message about ending conversation
     connection.on("EndConversationMessage", function (message, usrnm) {
@@ -84,20 +87,30 @@
     });
     //Message about finding conversation
     connection.on("FoundConversationMessage", function (message) {
+        var searching = document.getElementsByClassName("searching");
+        searching[0].remove();
+        var searchingLine = document.getElementsByClassName('searching-line');
+        searchingLine[1].remove();
+        searchingLine[0].remove();
         document.getElementById("messageList").innerHTML += "<li><div class='find'>" + message + "</div></li>";
         document.getElementById("sendButton").disabled = false;
         document.getElementById("nextStranger").disabled = false;
+        
     });
     //Message about searching for conversation
     connection.on("SearchingForConversationMessage", function (message) {
-        document.getElementById("messageList").innerHTML += "<hr><li><div class='searching'>" + message + "</div></li><hr>";
+        document.getElementById("messageList").innerHTML += "<hr class='searching-line'><li><div class='searching'>" + message + "</div></li><hr class='searching-line'>";
         document.getElementById("sendButton").disabled = true;
         document.getElementById("nextStranger").disabled = true;
     });
    
 
     document.getElementById("sendButton").addEventListener("click", function(event){
-        var message = document.getElementById("message").value;
+        var message = document.getElementById("message").value.trim();
+        if (message == "") {
+            alert("Musisz wpisać wiadomość");
+            return;
+        }
         message = CryptoJS.AES.encrypt(message, connectionId).toString();
         connection.invoke("SendMessage", username,message).then(function(){
             document.getElementById("message").value=""
@@ -121,13 +134,13 @@
 
     function SetUsername(){
         connection.start().then(function () {
-            document.getElementById("sendButton").disabled = false;
+            //document.getElementById("sendButton").disabled = false;
         }).catch(function (err) {
             return console.error(err.toString());
         });
         var usernameinput = document.getElementById("username").value;
         if (usernameinput == ""){
-            alert("please enter you user name");
+            alert("Podaj swoją nazwę użytkownika");
             return;
         }
         username = usernameinput;
@@ -144,5 +157,7 @@
     window.onbeforeunload = function (e) {
         connection.stop();
     }
+
+
 
 </script>
